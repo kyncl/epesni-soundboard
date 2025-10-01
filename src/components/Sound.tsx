@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { soundAPI } from "../lib/FetchData";
 import { FiVolume1, FiVolume2, FiVolumeX } from "react-icons/fi";
 
@@ -11,10 +11,15 @@ export const SoundBtn = ({ title, audioSrc, volume }: { title: string, audioSrc:
             return;
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
-        audioRef.current.volume = volume;
         audioRef.current.play();
         setCounter(counter + 1);
     }
+
+    useEffect(() => {
+        if (!audioRef.current)
+            return;
+        audioRef.current.volume = volume;
+    }, [volume]);
 
     return (
         <button onClick={playAudio}>

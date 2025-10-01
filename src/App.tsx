@@ -2,16 +2,25 @@ import { useEffect, useState } from 'react';
 import './App.css'
 import { fetchSounds } from './lib/FetchData';
 import { SoundBtn, VolumeIcon } from './components/Sound';
+import type { Sound } from './lib/Sound';
 
 
 function App() {
-    const [buttons, setButtons] = useState<{ name: string, url: string, count?: number }[]>([]);
+    const [buttons, setButtons] = useState<Sound[]>([]);
     const [counter, setCounter] = useState(parseInt(sessionStorage.getItem("counter") ?? "0", 10));
     const [volume, setVolume] = useState(0.5);
     const [showVolume, setShowVolume] = useState(false);
     useEffect(() => {
-        fetchSounds().then((data: { name: string, url: string }[]) => {
-            setButtons(data);
+        fetchSounds().then((data) => {
+            if (data) {
+                const buttons = data.map((button, idx) => (
+                    {
+                        ...button,
+                        id: idx
+                    }
+                ));
+                setButtons(buttons);
+            }
         });
     }, []);
 
@@ -22,11 +31,11 @@ function App() {
                 <h2 className='pt-3 pb-3'>Counter: {counter}</h2>
             </div >
             <div className='flex flex-wrap w-2/3'>
-                {buttons.map(((button, idx) =>
+                {buttons.map(((button) =>
                     <div className='m-1' onClick={() => {
                         setCounter(counter + 1);
                         sessionStorage.setItem("counter", (counter + 1).toString());
-                    }} key={idx} >
+                    }} key={button.id} >
                         <SoundBtn title={button.name} audioSrc={button.url} volume={volume} />
                     </div>
                 ))}
