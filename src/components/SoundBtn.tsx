@@ -1,8 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import { soundAPI } from "../lib/FetchData";
-import { FiVolume1, FiVolume2, FiVolumeX } from "react-icons/fi";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 
-export const SoundBtn = ({ title, audioSrc, volume }: { title: string, audioSrc: string, volume: number }) => {
+interface SoundBtnProps {
+    title: string,
+    audioSrc: string,
+    volume: number,
+    soundAPI: string,
+    globalCounter: number,
+    globalSetCounter: Dispatch<SetStateAction<number>>
+}
+
+export const SoundBtn = ({
+    title,
+    audioSrc,
+    volume,
+    soundAPI,
+    globalCounter,
+    globalSetCounter
+}: SoundBtnProps) => {
     const [counter, setCounter] = useState(0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -13,6 +27,9 @@ export const SoundBtn = ({ title, audioSrc, volume }: { title: string, audioSrc:
         audioRef.current.currentTime = 0;
         audioRef.current.play();
         setCounter(counter + 1);
+
+        globalSetCounter(globalCounter + 1);
+        sessionStorage.setItem("counter", (globalCounter + 1).toString());
     }
 
     useEffect(() => {
@@ -28,16 +45,4 @@ export const SoundBtn = ({ title, audioSrc, volume }: { title: string, audioSrc:
         </button>
     )
 };
-
-
-export const VolumeIcon = ({ volume, style }: { volume: number, style?: string }) => {
-    return (
-        volume == 0 ?
-            <FiVolumeX className={style} />
-            : volume < 0.6 ?
-                <FiVolume1 className={style} />
-                :
-                <FiVolume2 className={style} />
-    )
-}
 

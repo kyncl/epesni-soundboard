@@ -1,25 +1,22 @@
 import { useEffect, useState } from 'react';
 import './App.css'
-import { fetchSounds } from './lib/FetchData';
-import { SoundBtn, VolumeIcon } from './components/Sound';
-import type { Sound } from './lib/Sound';
+import type { Sound } from './lib/sound';
+import { fetchSounds } from './lib/fetchData';
+import { getSessCounterNumber } from './lib/cache';
+import { VolumeIcon } from './components/VolumeIcon';
+import { SoundBtn } from './components/SoundBtn';
 
+const soundAPI = import.meta.env.VITE_SOUND_API;
 
 function App() {
     const [buttons, setButtons] = useState<Sound[]>([]);
-    const [counter, setCounter] = useState(parseInt(sessionStorage.getItem("counter") ?? "0", 10));
+    const [counter, setCounter] = useState(getSessCounterNumber());
     const [volume, setVolume] = useState(0.5);
     const [showVolume, setShowVolume] = useState(false);
     useEffect(() => {
-        fetchSounds().then((data) => {
+        fetchSounds(soundAPI).then((data) => {
             if (data) {
-                const buttons = data.map((button, idx) => (
-                    {
-                        ...button,
-                        id: idx
-                    }
-                ));
-                setButtons(buttons);
+                setButtons(data);
             }
         });
     }, []);
@@ -32,12 +29,15 @@ function App() {
             </div >
             <div className='flex flex-wrap w-2/3'>
                 {buttons.map(((button) =>
-                    <div className='m-1' onClick={() => {
-                        setCounter(counter + 1);
-                        sessionStorage.setItem("counter", (counter + 1).toString());
-                    }} key={button.id} >
-                        <SoundBtn title={button.name} audioSrc={button.url} volume={volume} />
-                    </div>
+                    <SoundBtn
+                        title={button.name}
+                        audioSrc={button.url}
+                        volume={volume}
+                        soundAPI={soundAPI}
+                        globalSetCounter={setCounter}
+                        globalCounter={counter}
+                        key={button.url}
+                    />
                 ))}
             </div>
             <div className='fixed right-10 bottom-10 min-w-28'>
